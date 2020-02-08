@@ -1,0 +1,91 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.5.3/css/bootstrap-colorpicker.css" crossorigin="anonymous">
+		<style>
+			html, body {
+				font-size: 16px;
+				line-height: 1.25;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container mt-3">
+			<div calss="row">
+				<div class="col-10 offset-1">
+					<form method="GET" action="/blink">
+					  <div class="form-group">
+					    <label for="brightnessControl">Brightness</label>
+					    <input type="range" class="form-control-range" id="brightnessControl" name="brightness" />
+					  	<label for="colorControl">Color</label>
+					    <input type="text" class="form-control" id="colorControl" value="rgb(255, 255, 255)" />
+					  </div>
+					</form>
+				</div>
+
+			</form>
+		</div>
+
+
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+			<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.5.3/js/bootstrap-colorpicker.min.js" crossorigin="anonymous"></script>
+
+		<script>
+			// $ = jQuery();
+			class BedBrainClient {
+				constructor(url='http://192.168.1.63/api/') {
+					this.API_URL = url;
+				}
+				setBrightness(b) {
+					$.ajax({
+						type: 'GET',
+						url: this.API_URL + '?brightness=' + b,
+						success: (data) => {
+							console.log('[INFO] Brightness set');
+						},
+						error: (xhr) => {
+							throw Error('[ERROR] Failed to set brightness');
+						}
+					})
+				}
+				setColors(c) {
+					const colorQuery = '?r=' + c[0] + '&g=' + c[1] + '&b=' + c[2];
+					$.ajax({
+						type: 'GET',
+						url: this.API_URL + colorQuery,
+						success: (data) => {
+							console.log('[INFO] Color set')
+						},
+						error: (xhr) => {
+							throw Error('[ERROR] Failed to set color');
+						}
+					})
+				}
+b
+			}
+
+			bedBrain = new BedBrainClient();
+
+			function parseColors (c) {
+				c = c.replace('rgb(', '').replace(')', '').split(',');
+				return [parseInt(c[0]), parseInt(c[1]), parseInt(c[2])];
+			}
+
+			$(document).ready(function() {
+				$('#colorControl').colorpicker();
+				$('#colorControl').on('change', function(event) {
+					bedBrain.setColors(parseColors($('#colorControl').val()));
+				});
+
+				$('#brightnessControl').on('change', function(e) {
+					console.log("BRIGHTNESS: " + $(this).val() + "%");
+					bedBrain.setBrightness($(this).val());
+				});
+
+			});
+		</script>
+
+	</body>
+</html>
