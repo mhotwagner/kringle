@@ -13,6 +13,9 @@ ESP8266WebServer server(serverPort);
 int dataPin = D8;
 int ledCount = 20;
 
+byte mac[6];
+String macId;
+
 Adafruit_NeoPixel ornament = Adafruit_NeoPixel(ledCount, dataPin, NEO_GRB + NEO_KHZ800);
 
 // Start the shelf lights
@@ -23,6 +26,7 @@ void initializeOrnament() {
   ornament.setBrightness(50);
   blinkLeds(&ornament, 3);
 }
+
 
 void setup() {
   Serial.begin(9600);
@@ -41,14 +45,12 @@ void setup() {
     initializeWifi(get_wifi_ssid(), get_wifi_pass());  
   }
   
-  initializeServer();
+  //initializeServer();
 
   initializeOrnament();
-  
-  server.begin();
 }
 
 
 void loop() {
-  server.handleClient();
+  Serial.println(".");
 }
