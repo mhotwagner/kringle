@@ -1,3 +1,10 @@
+<<<<<<< HEAD
+=======
+// wifi info
+const char* wifi_ssid = "Hotswag Manor";
+const char* wifi_pass = "xoxo<3!!";
+
+>>>>>>> A working ornament with a socket connection
 // Start the wifi
 void initializeWifi(const char* wifi_ssid, const char* wifi_pass) {
   Serial.print("[INFO] Connecting to ");
