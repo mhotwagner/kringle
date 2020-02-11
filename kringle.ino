@@ -1,3 +1,5 @@
+#include <Ornament.h>
+
 #include <ArduinoJson.h>
 <<<<<<< HEAD
 
@@ -29,15 +31,20 @@ int ledCount = 6;
 
 int c_red = Adafruit_NeoPixel::Color(0, 255, 0);
 int c_green = Adafruit_NeoPixel::Color(255, 0, 0);
+int c_blue =  Adafruit_NeoPixel::Color(0, 0, 255);
 int c_yellow = Adafruit_NeoPixel::Color(255, 255, 0);
 int c_white = Adafruit_NeoPixel::Color(255, 255, 255);
 
 Adafruit_NeoPixel ornament = Adafruit_NeoPixel(ledCount, dataPin, NEO_GRB + NEO_KHZ800);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // Start the shelf lights
 =======
 
+=======
+Ornament thing = Ornament(&ornament);
+>>>>>>> Commit before I break everything
 
 >>>>>>> A working ornament with a socket connection
 void initializeOrnament() {
@@ -78,6 +85,19 @@ void socketOnMessage(WebsocketsMessage message) {
 
   if (jsonData.containsKey("brightness")) {
     setBrightness(&ornament, jsonData["brightness"]);
+  }
+
+  if (jsonData.containsKey("red") && jsonData.containsKey("green") && jsonData.containsKey("blue")) {
+    int c = Adafruit_NeoPixel::Color(jsonData["green"], jsonData["red"], jsonData["blue"]);
+    setColor(&ornament, c);
+  }
+
+  if (jsonData.containsKey("xmas")) {
+    xmas(&ornament);
+  }
+
+  if (jsonData.containsKey("jmas")) {
+    jmas(&ornament);
   }
   
     

@@ -28,6 +28,10 @@ void turnOnLeds(Adafruit_NeoPixel *leds, int c, int b) {
   leds->show();
 }
 
+void setColor(Adafruit_NeoPixel *leds, int c) {
+  turnOnLeds(leds, c);
+}
+
 void setBrightness(Adafruit_NeoPixel *leds, int b) {
   Serial.print("[INFO] Setting LED brightness to ");
   Serial.print(b);
@@ -77,17 +81,16 @@ void infoBlink(Adafruit_NeoPixel *leds) {
   blinkLeds(leds, 2, c_yellow);
 }
 
-void xmas(Adafruit_NeoPixel *leds) {
-  Serial.println("[INFO] XMAS MODE!");
+void every_other(Adafruit_NeoPixel *leds, int c_a, int c_b) {
   int i = 0;
-  while (i < 20) {
+  while (i < 10) {
     int j = 0;
     // red first
     while (j < 6) {
       if (j % 2 == 0) {
-        leds->setPixelColor(j, c_red);
+        leds->setPixelColor(j, c_a);
       } else {
-        leds->setPixelColor(j, c_green);
+        leds->setPixelColor(j, c_b);
       }
       j++;
     }
@@ -98,9 +101,9 @@ void xmas(Adafruit_NeoPixel *leds) {
     j = 0;
     while (j < 6) {
       if (j % 2 == 0) {
-        leds->setPixelColor(j, c_green);
+        leds->setPixelColor(j, c_b);
       } else {
-        leds->setPixelColor(j, c_red);
+        leds->setPixelColor(j, c_a);
       }
       j++;
     }
@@ -110,4 +113,14 @@ void xmas(Adafruit_NeoPixel *leds) {
   }
   leds->fill();
   leds->show();
+}
+
+void xmas(Adafruit_NeoPixel *leds) {
+  Serial.println("[INFO] XMAS Mode!");
+  every_other(leds, c_red, c_green);
+}
+
+void jmas(Adafruit_NeoPixel *leds) {
+  Serial.println("[INFO] JMAS Mode!");
+  every_other(leds, c_white, c_blue);
 }
