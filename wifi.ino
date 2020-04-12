@@ -1,9 +1,5 @@
-// wifi info
-const char* wifi_ssid = "HotPet Manor";
-const char* wifi_pass = "Ourfirsthome1";
-
 // Start the wifi
-void initializeWifi() {
+void initializeWifi(const char* wifi_ssid, const char* wifi_pass) {
   Serial.print("[INFO] Connecting to ");
   Serial.print(wifi_ssid);
   Serial.println("...");
