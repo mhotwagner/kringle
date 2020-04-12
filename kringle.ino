@@ -27,7 +27,6 @@ StaticJsonDocument<200> jsonData;
 >>>>>>> A working ornament with a socket connection
 
 int dataPin = D8;
-int ledCount = 6;
 
 int c_red = Adafruit_NeoPixel::Color(0, 255, 0);
 int c_green = Adafruit_NeoPixel::Color(255, 0, 0);
@@ -35,6 +34,7 @@ int c_blue =  Adafruit_NeoPixel::Color(0, 0, 255);
 int c_yellow = Adafruit_NeoPixel::Color(255, 255, 0);
 int c_white = Adafruit_NeoPixel::Color(255, 255, 255);
 
+<<<<<<< HEAD
 Adafruit_NeoPixel ornament = Adafruit_NeoPixel(ledCount, dataPin, NEO_GRB + NEO_KHZ800);
 
 <<<<<<< HEAD
@@ -45,12 +45,14 @@ Adafruit_NeoPixel ornament = Adafruit_NeoPixel(ledCount, dataPin, NEO_GRB + NEO_
 =======
 Ornament thing = Ornament(&ornament);
 >>>>>>> Commit before I break everything
+=======
+Ornament ornament = Ornament(dataPin);
+>>>>>>> WIP
 
 >>>>>>> A working ornament with a socket connection
 void initializeOrnament() {
   Serial.println("[INFO] Initializing ornament");
-  ornament.begin();
-  blinkLeds(&ornament, 3);
+  ornament.init();
 }
 
 <<<<<<< HEAD
@@ -84,20 +86,24 @@ void socketOnMessage(WebsocketsMessage message) {
   deserializeJson(jsonData, message.data());
 
   if (jsonData.containsKey("brightness")) {
-    setBrightness(&ornament, jsonData["brightness"]);
+    //setBrightness(&ornament, jsonData["brightness"]);
+    ornament.set_brightness(jsonData["brightness"]);
   }
 
   if (jsonData.containsKey("red") && jsonData.containsKey("green") && jsonData.containsKey("blue")) {
     int c = Adafruit_NeoPixel::Color(jsonData["green"], jsonData["red"], jsonData["blue"]);
-    setColor(&ornament, c);
+    //setColor(&ornament, c);
+    ornament.set_color(c);
   }
 
   if (jsonData.containsKey("xmas")) {
-    xmas(&ornament);
+    //xmas(&ornament);
+    ornament.xmas();
   }
 
   if (jsonData.containsKey("jmas")) {
-    jmas(&ornament);
+    //jmas(&ornament);
+    ornament.jmas();
   }
   
     
@@ -125,11 +131,14 @@ void initializeApi() {
   
   Serial.println("[INFO] status: " + String(statusCode));
   if (statusCode == 200) {
-    successBlink(&ornament);
+    //successBlink(&ornament);
+    ornament.success_blink();
   } else if (statusCode == 201) {
-    infoBlink(&ornament);
+    //infoBlink(&ornament);
+    ornament.info_blink();
   } else {
-    errorBlink(&ornament);
+    //errorBlink(&ornament);
+    ornament.error_blink();
     return;
   }
 
@@ -163,7 +172,9 @@ void setup() {
 
   initializeApi();
 
-  turnOnLeds(&ornament, c_white, 50);
+  //turnOnLeds(&ornament, c_white, 50);
+  ornament.on(Ornament::c_white, 50);
+  
 }
 
 

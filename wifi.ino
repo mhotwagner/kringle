@@ -1,7 +1,7 @@
 <<<<<<< HEAD
 =======
 // wifi info
-const char* wifi_ssid = "Hotswag Manor";
+const char* wifi_ssid = "Hotswag Manor_2GEXT";
 const char* wifi_pass = "xoxo<3!!";
 
 >>>>>>> A working ornament with a socket connection
