@@ -23,12 +23,6 @@ StaticJsonDocument<200> jsonData;
 int dataPin = D8;
 int ledCount = 6;
 
-int c_red = Adafruit_NeoPixel::Color(0, 255, 0);
-int c_green = Adafruit_NeoPixel::Color(255, 0, 0);
-int c_blue =  Adafruit_NeoPixel::Color(0, 0, 255);
-int c_yellow = Adafruit_NeoPixel::Color(255, 255, 0);
-int c_white = Adafruit_NeoPixel::Color(255, 255, 255);
-
 Ornament ornament = Ornament(dataPin);
 
 void initializeOrnament() {
@@ -125,7 +119,6 @@ void setup() {
 
   initializeApi();
 
-  //turnOnLeds(&ornament, c_white, 50);
   ornament.on(Ornament::c_white, 50);
   
 }
