@@ -9,7 +9,7 @@ class BlinkHandler : public RequestHandler {
     } else {
       n = requestUri.substring(7).toInt();
     }
-    blinkLeds(&ornament, n);
+    ornament.blink(n);
     server.send(200);
     return true;
   }
@@ -26,13 +26,11 @@ class APIHandler : public RequestHandler {
     String argument = requestUri.substring(5);
     if (argument.startsWith("on/")) turnOn = true;
     if (argument.startsWith("off/")) {
-      ornament.fill();
-      ornament.show();
+      ornament.off();
     }
 
     if (turnOn) {
-      ornament.fill(Adafruit_NeoPixel::Color(255, 255, 255));
-      ornament.show();
+      ornament.on(ornament.c_white);
     }
     
     server.send(200);
@@ -59,7 +57,7 @@ String header;
 // Index view
 void handleIndex() {
   Serial.println("[INFO] GET /");
-  blinkLeds(&ornament, 1);
+  ornament.blink();
   String data = readFile("/dashboard.html");
   server.send(200, "text/html", data);
 }
@@ -67,7 +65,14 @@ void handleIndex() {
 // xmas view
 void handleXmas() {
   Serial.println("[INFO] GET /xmas/");
-  xmas(&ornament);
+  ornament.xmas();
+  server.send(200);
+}
+
+// jmas view
+void handleJmas() {
+  Serial.println("[INFO] GET /xmas/");
+  ornament.jmas();
   server.send(200);
 }
 
@@ -81,6 +86,7 @@ void initializeServer() {
   
   server.on("/", handleIndex);
   server.on("/xmas/", handleXmas);
+  server.on("/jmas/", handleJmas);
 //  server.on("/blink", handleBlink);
 //  server.on("/dash", handleDash);
 

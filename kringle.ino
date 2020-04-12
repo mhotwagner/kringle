@@ -1,22 +1,17 @@
 #include <Ornament.h>
 
 #include <ArduinoJson.h>
-<<<<<<< HEAD
-
-=======
 #include <ArduinoWebsockets.h>
->>>>>>> A working ornament with a socket connection
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
-
+#include <ESP8266WebServer.h>
 #include <FS.h>
-
 #include <Adafruit_NeoPixel.h>
 
-<<<<<<< HEAD
+
 const int serverPort = 80;
 ESP8266WebServer server(serverPort);
-=======
+
 using namespace websockets;
 
 HTTPClient webClient;
@@ -24,9 +19,9 @@ HTTPClient webClient;
 WebsocketsClient socketClient;
 
 StaticJsonDocument<200> jsonData;
->>>>>>> A working ornament with a socket connection
 
 int dataPin = D8;
+int ledCount = 6;
 
 int c_red = Adafruit_NeoPixel::Color(0, 255, 0);
 int c_green = Adafruit_NeoPixel::Color(255, 0, 0);
@@ -34,50 +29,11 @@ int c_blue =  Adafruit_NeoPixel::Color(0, 0, 255);
 int c_yellow = Adafruit_NeoPixel::Color(255, 255, 0);
 int c_white = Adafruit_NeoPixel::Color(255, 255, 255);
 
-<<<<<<< HEAD
-Adafruit_NeoPixel ornament = Adafruit_NeoPixel(ledCount, dataPin, NEO_GRB + NEO_KHZ800);
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-// Start the shelf lights
-=======
-
-=======
-Ornament thing = Ornament(&ornament);
->>>>>>> Commit before I break everything
-=======
 Ornament ornament = Ornament(dataPin);
->>>>>>> WIP
 
->>>>>>> A working ornament with a socket connection
 void initializeOrnament() {
   Serial.println("[INFO] Initializing ornament");
   ornament.init();
-}
-
-<<<<<<< HEAD
-=======
-// Read a file from SPIFFS
-String readFile(String path) {
-  Serial.println("[INFO] Servfing file " + path);
-  if (SPIFFS.exists(path)) {
-    File file = SPIFFS.open(path, "r");
-    String data = file.readString();
-    file.close();
-    return data;
-  }
-  Serial.println("[ERROR] File Not Found");
-  return "";
-}
-
-
-// Start the file system
-void initializeFS() {
-  if(SPIFFS.begin()) {
-    Serial.println("SPIFFS Initialize....ok");
-  } else {
-    Serial.println("SPIFFS Initialization...failed");
-  }
 }
 
 void socketOnMessage(WebsocketsMessage message) {
@@ -104,9 +60,7 @@ void socketOnMessage(WebsocketsMessage message) {
   if (jsonData.containsKey("jmas")) {
     //jmas(&ornament);
     ornament.jmas();
-  }
-  
-    
+  } 
 }
 
 void socketOnEvent(WebsocketsEvent event, String data) {
@@ -147,7 +101,6 @@ void initializeApi() {
   String socketUrl = "http://staging.northpoler.com/ws/ornaments/device/" + macId + "/";
   socketClient.connect(socketUrl);
 }
->>>>>>> A working ornament with a socket connection
 
 void setup() {
   Serial.begin(9600);
