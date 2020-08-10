@@ -1,4 +1,5 @@
-void initializeWifi(const char* wifi_ssid, const char* wifi_pass) {
+void initializeWifiClient(const char* wifi_ssid, const char* wifi_pass) {
+  Serial.println("[INFO] Initializing wifi client");
   Serial.print("[INFO] Connecting to ");
   Serial.print(wifi_ssid);
   Serial.println("...");

@@ -1,0 +1,114 @@
+<html>
+	<head>
+		<style>
+			html, body {
+				font-family: Roboto, sans-serif;
+				font-size: 16px;
+				line-height: 1.25;
+				height: 100%;
+				background-color: #ccc;
+			}
+
+			body {
+				display: flex;
+				justify-content: space-around;
+				align-items: center;
+			}
+
+			.modal {
+				width: 400px;
+				height: 200px;
+				padding: 20px;
+				border-radius: 15px;
+				box-shadow: 2px 2px 2px #aaa;
+				background-color: #eee;
+			}
+
+			label {
+				margin-top: 0.5em;
+				display: inline-block;
+				width: 40%;
+			}
+
+			.warn label {
+				color: red;
+			}
+
+			button {
+				margin-top: 0.5em;
+				font-size: 1em;
+			}
+
+
+		</style>
+	</head>
+	<body>
+		<div class="modal">
+			<center>
+				<h3>Configuration</h3>
+			</center>
+			<form>
+				<div class="form-group" id="wifi_ssid_group">
+					<label for="wifi_ssid">Network Name</label>
+					<input type="text" name="wifi_ssid" id="wifi_ssid"/>
+				</div>
+
+				<div class="form-group" id="wifi_password_group">
+					<label for="wifi_password">Network Password</label>
+					<input type="text" name="wifi_password" id="wifi_password"/>
+				</div>
+
+				<div class="form-group" id="api_host_group">
+					<label for="api_host">API Host (eg, api.northpoler.com)</label>
+					<input type="text" name="api_host" id="api_host"/>
+				</div>
+
+				<button id="update">Update</button>
+			</form>
+
+
+		<script>
+
+			document.getElementById('update').addEventListener('click', function(e) {
+				e.preventDefault();
+				wifiSsid = document.getElementById('wifi_ssid').value
+				wifiPassword = document.getElementById('wifi_password').value;
+				apiHost = document.getElementById('api_host').value;
+				if (wifiSsid.length && wifiPassword.length && apiHost.length) {
+					console.log('doing the ajax');
+						var request = new XMLHttpRequest();
+
+						request.onreadystatechange = function (data) {
+							console.log('[INFO] readyStateChange');
+							console.log(data);
+							console.log(request);
+						  if (request.readyState != 4 || request.status != 200) {
+						  	alert("[ERROR] Update failed - " + request.body);
+						  } else {
+						  	alert("[INFO] Update Succesful!\nOrnament Rebooting...");
+						  	return;
+						  }
+						}
+						data = JSON.stringify({
+							wifi_ssid: wifiSsid, wifi_password: wifiPassword, api_host: apiHost,
+						});
+						request.open('POST', '/config/', true);
+						request.setRequestHeader('Content-Type', 'application/json')
+						request.send(data);
+						console.log('---');
+						console.log(request);
+				} else {
+					console.log('no good');
+					if (!wifiSsid.length) document.getElementById('wifi_ssid_group').className = 'warn';
+					if (!wifiPassword.length) document.getElementById('wifi_password_group').className = 'warn';
+					if (!apiHost.length) document.getElementByIdById('api_host_group').className = 'warn';
+					return false;
+
+				}
+
+			})
+			
+		</script>
+
+	</body>
+</html>

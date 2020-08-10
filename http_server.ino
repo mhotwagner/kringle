@@ -1,3 +1,17 @@
+/*
+// This is the legachy HTTP server used for initial testing
+// this server can server as a backup to a live socket connection
+// in the case that internet access is not available
+// (or, more specifically, that a northpoler api is unreachable)
+//
+// To use, be sure to call initializeServer somewhere in the setup()
+// NOTE, this currently shares a namespace w/the config server
+// so it's one or the other
+//
+// Finally, if this is really meant to serve as a backup, its
+// endpoints should be kept up to date w/the socket endpoints
+*/
+
 class BlinkHandler : public RequestHandler {
   bool canHandle(HTTPMethod method, String uri) {
     return uri.startsWith( "/blink" );

@@ -1,4 +1,6 @@
 {
-	"wifi_ssid": "Inidos",
-	"wifi_password": "ruddiman"
+	"boot_to_config": true,
+	"wifi_ssid": "",
+	"wifi_password": "",
+	"api_host": ""
 }
