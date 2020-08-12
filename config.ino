@@ -1,19 +1,22 @@
 Config::Config() {
     Serial.println("[INFO] Loading config");
     String rawConfig = readFile("/config.json");
-    DynamicJsonDocument doc(1024);
-    deserializeJson(doc, rawConfig);
-
-    boot_to_config = doc["boot_to_config"].as<bool>();
-    wifi_ssid = doc["wifi_ssid"].as<const char*>();
-    wifi_password = doc["wifi_password"].as<const char*>();
-    api_host = doc["api_host"].as<const char*>();
     
-    Serial.print("[INFO] wifi_ssid - ");
+    DynamicJsonDocument _doc(1024);
+    deserializeJson(_doc, rawConfig);
+    data = _doc.as<JsonObject>();
+  
+    boot_to_config = _doc["boot_to_config"].as<bool>();
+    Serial.print("boot_to_config: ");
+    Serial.println(boot_to_config);
+    wifi_ssid = _doc["wifi_ssid"].as<const char*>();
+    Serial.print("wifi_ssid: ");
     Serial.println(wifi_ssid);
-    Serial.print("[INFO] wifi_password - ");
+    wifi_password = _doc["wifi_password"].as<const char*>();
+    Serial.print("wifi_password: ");
     Serial.println(wifi_password);
-    Serial.print("[INFO] api_host - ");
+    api_host = _doc["api_host"].as<const char*>();
+    Serial.print("api_host: ");
     Serial.println(api_host);
 }
 
@@ -29,4 +32,11 @@ bool Config::apiConfigured() {
     return true;
   }
   return false;
+}
+
+ String Config::renderTemplate(String _template) {
+  for (JsonPair kv : data) {
+    Serial.println(kv.key().c_str());
+  }
+  return _template;
 }

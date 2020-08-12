@@ -24,7 +24,15 @@ void socketOnMessage(WebsocketsMessage message) {
   if (jsonData.containsKey("jmas")) {
     //jmas(&ornament);
     ornament.jmas();
-  } 
+  }
+
+  if (jsonData.containsKey("reboot") && jsonData["reboot"].as<bool>()) {
+    reboot();
+  }
+
+  if (jsonData.containsKey("config")) {
+    socketOnConfigUpdate(jsonData["config"].as<JsonObject>());
+  }
 }
 
 void socketOnEvent(WebsocketsEvent event, String data) {
@@ -37,6 +45,22 @@ void socketOnEvent(WebsocketsEvent event, String data) {
     } else if(event == WebsocketsEvent::GotPong) {
         Serial.println("Got a Pong!");
     }
+}
+
+void socketOnConfigUpdate(JsonObject config) {
+  Serial.println("[INFO] Handling config update via socket");
+  DynamicJsonDocument doc(128);
+  doc["wifi_ssid"] = config["boot_to_config"];
+  doc["wifi_ssid"] = config["wifi_ssid"];
+  doc["wifi_password"] = config["wifi_password"];
+  doc["api_host"] = config["api_host"];
+
+  bool success = writeFile("/config.json", doc);
+  if (success) {
+    Serial.println("[INFO] Success");
+  } else {
+    Serial.println("[ERROR] Failed to save configuration");
+  }
 }
 
 void initializeApi(String apiUrlBase) {

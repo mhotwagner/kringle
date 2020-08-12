@@ -1,3 +1,17 @@
+String renderFile(String path, JsonObject data) {
+  String content = readFile(path);
+  if (content) {
+    Serial.println("conf data?");
+    Serial.println(data);
+    Serial.println("is null?");
+    Serial.println(data.isNull());
+    for (JsonPair kv : data) {
+      Serial.println(kv.key().c_str());
+    }
+  }
+  return content;
+}
+
 String readFile(String path) {
   Serial.println("[INFO] Reading file " + path);
   if (SPIFFS.exists(path)) {

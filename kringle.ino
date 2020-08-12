@@ -78,9 +78,7 @@ void setup() {
     // ornament.on(Ornament::c_yellow, 50);
     Serial.println("[WARN] Congifuration failed to load");
     Serial.println("[WARN] Running configuration server");
-    Serial.println(configured);
     initializeConfigServer();
-    Serial.println(configured);
   }
 
 }

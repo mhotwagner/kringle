@@ -27,10 +27,18 @@ void initializeConfigServer() {
   Serial.println(">");
 }
 
+String renderAuthTemplate(String _template, Config _conf) {
+  _template.replace("{{boot_to_config}}", _conf.boot_to_config ? "checked" : "");
+  _template.replace("{{wifi_ssid}}", _conf.wifi_ssid);
+  _template.replace("{{wifi_password}}", _conf.wifi_password);
+  _template.replace("{{api_host}}", _conf.api_host);
+  return _template;
+}
+
 void handleAuthDash() {
   Serial.println("[INFO] GET /");
-  String data = readFile("/config.html");
-  server.send(200, "text/html", data);
+  String content = renderAuthTemplate(readFile("/config.html"), Config());
+  server.send(200, "text/html", content);
 }
 
 void handleAuthUpdate() {
@@ -40,10 +48,13 @@ void handleAuthUpdate() {
   if (!doc.containsKey("wifi_ssid") || !doc.containsKey("wifi_password") || !doc.containsKey("api_host")) {
     server.send(500, "text/plain", "[ERROR] MUST INCLUDE wifi_ssid AND wifi_password AND api_host ARGUMENTS");
   }
+  bool boot_to_config = doc.containsKey("boot_to_config") ? doc["boot_to_config"].as<bool>() : false;
   String ssid = doc["wifi_ssid"];
   String pass = doc["wifi_password"];
   String api_host = doc["api_host"];
-  Serial.print("[INFO] Storing config: { wifi_ssid: '");
+  Serial.print("[INFO] Storing config: { boot_to_config: ");
+  Serial.print(boot_to_config);
+  Serial.print(", wifi_ssid: '");
   Serial.print(ssid);
   Serial.print("', wifi_password: '");
   Serial.print(pass);

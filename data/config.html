@@ -17,7 +17,6 @@
 
 			.modal {
 				width: 400px;
-				height: 200px;
 				padding: 20px;
 				border-radius: 15px;
 				box-shadow: 2px 2px 2px #aaa;
@@ -48,19 +47,23 @@
 				<h3>Configuration</h3>
 			</center>
 			<form>
+				<div class="form-group" id="boot_to_config">
+					<label for="boot_to_config">Boot to Config</label>
+					<input type="checkbox" name="boot_to_config" id="boot_to_config" {{boot_to_config}} />
+				</div>
 				<div class="form-group" id="wifi_ssid_group">
 					<label for="wifi_ssid">Network Name</label>
-					<input type="text" name="wifi_ssid" id="wifi_ssid"/>
+					<input type="text" name="wifi_ssid" id="wifi_ssid" value="{{wifi_ssid}}"/>
 				</div>
 
 				<div class="form-group" id="wifi_password_group">
 					<label for="wifi_password">Network Password</label>
-					<input type="text" name="wifi_password" id="wifi_password"/>
+					<input type="text" name="wifi_password" id="wifi_password" value="{{wifi_password}}"/>
 				</div>
 
 				<div class="form-group" id="api_host_group">
 					<label for="api_host">API Host (eg, api.northpoler.com)</label>
-					<input type="text" name="api_host" id="api_host"/>
+					<input type="text" name="api_host" id="api_host" value="{{api_host}}"/>
 				</div>
 
 				<button id="update">Update</button>
