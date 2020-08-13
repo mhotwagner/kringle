@@ -1,0 +1,8 @@
+{
+  "config": {
+    "boot_to_config": true,
+    "wifi_ssid": null,
+    "wifi_password": null,
+    "api_host": null
+  }
+}
