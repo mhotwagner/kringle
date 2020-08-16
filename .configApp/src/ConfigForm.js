@@ -1,38 +1,47 @@
 import {css} from "emotion";
 import {Button, Input, ToggleGroup} from "./components";
+import {useState} from "preact/hooks";
 
 export function ConfigForm(props) {
+    const [errors, setErrors] = useState([]);
+    const [warnings, setWarnings] = useState([]);
+
     return (
         <form
-            method="POST"
-            action={props.configUrl}
             className={css`
+                ${props.css};
 				display: flex;
 				flex-direction: column;
-				input {
-					margin-bottom: 1em;
-				}
+				input { margin-bottom: 1em; }
 			`}
         >
             <h4
                 className={css`
-						font-weight: normal;
-						font-size: 1.2em;
-						margin-bottom: 1em;
-						padding-bottom: 0.5em;
-						border-bottom: 1px solid #333;
-					`}
-            >Northpoler Configuration</h4>
+                    font-weight: normal;
+                    font-size: 1.2em;
+                    margin-bottom: 1em;
+                    padding-bottom: 0.5em;
+                    border-bottom: 1px solid #333;
+            `}>Northpoler Configuration</h4>
 
-            <Input name="wifi_ssid" value={props.conf.wifi_ssid} onChange={props.inputHandler}>
+            <Input name="wifi_ssid" value={props.conf.wifi_ssid} onChange={props.inputHandler}
+                   errors={errors.filter((e) => e.type === 'wifi_ssid')}
+                   warnings={warnings.filter((e) => e.type === 'wifi_ssid')}
+            >
                 Wifi SSID
             </Input>
 
-            <Input name="wifi_password" value={props.conf.wifi_password} onChange={props.inputHandler}>
+            <Input name="wifi_password" value={props.conf.wifi_password} onChange={props.inputHandler}
+                   errors={errors.filter((e) => e.type === 'wifi_password')}
+                   warnings={warnings.filter((e) => e.type === 'wifi_password')}
+            >
                 Wifi Password
             </Input>
 
-            <Input name="api_host" value={props.conf.api_host} onChange={props.inputHandler}>
+            <Input name="api_host" value={props.conf.api_host} onChange={props.inputHandler}
+                   errors={errors.filter((e) => e.type === 'api_host')}
+                   warnings={warnings.filter((e) => e.type === 'api_host')}
+            >
                 API Host
             </Input>
 
@@ -47,14 +56,7 @@ export function ConfigForm(props) {
             <Button
                 id="update"
                 className={css`margin-top: 1em;`}
-                onClick={e => {
-                    e.preventDefault()
-                    let message = '';
-                    for (const key of Object.keys(props.conf)) {
-                        message += `${key}: ${props.conf[key]}\n`
-                    }
-                    alert(message);
-                }}
+                onClick={(e) => props.submitHandler(e, setErrors, setWarnings)}
             >Update</Button>
         </form>
     );

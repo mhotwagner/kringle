@@ -1,21 +1,11 @@
 import {Fragment} from "preact";
 import {css} from "emotion";
-
-const buttonBaseStyle = css`
-  background-color: #fff;
-  border-width: 1px;
-  line-height: 1.5em;
-  cursor: pointer;
-  &:focus, &:hover {
-    background-color: #eee;
-    outline: none;
-    border-style: inset;
-  }`;
+import {buttonStyle, inputStyle, toggleStyle, inputWarningStyle, inputErrorStyle} from "./styles";
 
 
 export function Button(props) {
     const style = css`
-        ${buttonBaseStyle}
+        ${buttonStyle}
         ${props.css ? props.css : ''}
     `;
     return (
@@ -47,30 +37,10 @@ export function ToggleGroup(props) {
     // console.log('options');
     // console.log(props.options);
 
-    const baseStyle = css`
-                  display: flex;
-                  flex-direction: row;
-                  justify-content: center;
-                  margin-bottom: 1.5em;
-                  button {
-                    display: inline-block;
-                    padding: .5em 1em;
-                    border-radius: 0;
-                    border-width: 1px;
-                    border-right-width: 0;
-                    &:first-of-type {
-                      border-radius: 2px 0 0 2px;
-                    }
-                    &:last-of-type {
-                      border-right-width: 1px;
-                      border-radius: 0 2px 2px 0;
-                    }
-                  }
-                `
     return (
         <Fragment>
             <label htmlFor={props.name} className={css`margin-bottom: .5em`}>{props.children}</label>
-            <div className={`${baseStyle}`}>
+            <div className={toggleStyle}>
                 { props.options.map( (option) => {
                     const value = option.value ? option.value : option.name.toLowerCase();
                     return (
@@ -93,19 +63,20 @@ export function Input(props) {
     const type = props.type ? props.type : 'text';
     return (
         <Fragment>
-            <label htmlFor={props.name} className={css`margin-bottom: .25em`}>{props.children}</label>
+            <label htmlFor={props.name} className={css`margin-bottom: .25em; margin-left: .25rem`}>{props.children}</label>
+            { props.errors.map((error) => {
+                return <p className={inputErrorStyle}>{error.message}</p>
+            })}
+            { props.warnings.map((warning) => {
+                return <p className={inputWarningStyle}>{warning.message}</p>
+            })}
             <input
                 type={type}
                 name={props.name}
                 id={props.name}
                 value={props.value}
                 onInput={props.onChange}
-                className={css`
-					line-height: 1.5em;
-					margin-bottom: 1.5em;
-					border-width: 1px;
-					border-radius: 2px;
-				`}
+                className={inputStyle}
             />
         </Fragment>
     );

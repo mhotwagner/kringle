@@ -1,8 +1,8 @@
 {
   "config": {
-    "boot_to_config": true,
-    "wifi_ssid": null,
-    "wifi_password": null,
-    "api_host": null
+    "boot_to_config": false,
+    "wifi_ssid": "MikeLikesLaura",
+    "wifi_password": "20190824",
+    "api_host": "c18619301970.ngrok.io"
   }
 }
