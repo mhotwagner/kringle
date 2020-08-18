@@ -51,14 +51,14 @@ void setup() {
   }
 
   if (!conf.wifiConfigured()) {
-    Serial.print("[WARN] Wifi is NOT CONFIGURED");
+    Serial.println("[WARN] Wifi is NOT CONFIGURED");
   } else {
     Serial.print("[INFO] Wifi is configured to ");
     Serial.println(conf.wifi_ssid);
   }
 
   if (!conf.apiConfigured()) {
-    Serial.print("[WARN] API is NOT CONFIGURED");
+    Serial.println("[WARN] API is NOT CONFIGURED");
   } else {
     Serial.print("[INFO] API is configured to ");
     Serial.println(conf.api_host);

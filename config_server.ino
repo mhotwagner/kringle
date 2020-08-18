@@ -17,7 +17,6 @@ String getContentType(String extension) {
   return "text/plain";
 }
 
-
 String renderAuthTemplate(String _template, Config _conf) {
   _template.replace("{{boot_to_config}}", _conf.boot_to_config ? "checked" : "");
   _template.replace("{{wifi_ssid}}", _conf.wifi_ssid);
@@ -28,14 +27,15 @@ String renderAuthTemplate(String _template, Config _conf) {
 
 void handleAuthDash() {
   Serial.println("[INFO] GET /");
-  String content = renderAuthTemplate(readFile("/config.html"), Config());
+  String content = readFile("/config.html");
+  Serial.print(content);
   server.send(200, "text/html", content);
 }
 
-void handleAuthUpdate() {
+bool processAuthUpdate(String _doc) {
   Serial.println("[INFO] POST /config/");
   DynamicJsonDocument doc(128);
-  deserializeJson(doc, server.arg(0));
+  deserializeJson(doc, _doc);
   if (!doc.containsKey("wifi_ssid") || !doc.containsKey("wifi_password") || !doc.containsKey("api_host")) {
     server.send(500, "text/plain", "[ERROR] MUST INCLUDE wifi_ssid AND wifi_password AND api_host ARGUMENTS");
   }
@@ -54,6 +54,20 @@ void handleAuthUpdate() {
   Serial.println("' }");
 
   bool success = writeFile("/config.json", doc);
+  if (success) {
+    Serial.println("[INFO] Success");
+    return true;
+    reboot();
+  } else {
+    Serial.println("[ERROR] Failed to save configuration");
+    return false;
+  }
+}
+
+
+void handleAuthUpdate() {
+  Serial.println("[INFO] POST /config/");
+  bool success = processAuthUpdate(server.arg(0));
   if (success) {
     Serial.println("[INFO] Success");
     server.send(200);
@@ -80,12 +94,37 @@ class AssetHandler : public RequestHandler {
     }
 
     String extension = path.substring(path.indexOf("."));
-    String content = readFile(path);
 
-    server.send(200, getContentType(extension), content);
+    server.send(200, getContentType(extension), readFile(path));
     return true;
   }
 } assetHandler;
+
+class ConfigApiHandler : public RequestHandler {
+  bool canHandle(HTTPMethod method, String uri) {
+    return uri.startsWith("/api/config");
+  }
+
+  bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, String requestUri) {
+    String path = requestUri.substring(4);
+    if (requestMethod==HTTP_GET) {
+      Serial.println("[INFO] GET /api/config/");
+      server.send(200, "application/json", readFile("/config.json"));
+      return true;
+    }
+    if (requestMethod==HTTP_POST) {
+      Serial.println("[INFO] POST /api/config/");
+      bool success = processAuthUpdate(server.arg(0));
+      if (success) {
+        server.send(200, "text/plain", "OK");
+        return true;
+      } else {
+        server.send(500);
+        return false;
+      }
+    }
+  }
+} configApiHandler;
 
 void handleNotFound() {
   Serial.print("[WARN] ");
@@ -111,6 +150,7 @@ void initializeConfigServer() {
   WiFi.softAPConfig(local_ip, gateway, subnet);
 
   server.addHandler(&assetHandler);
+  server.addHandler(&configApiHandler);
 
   server.on("/", handleAuthDash);
   server.on("/config/", HTTP_POST, handleAuthUpdate);

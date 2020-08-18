@@ -21,6 +21,9 @@ Config::Config() {
 }
 
 bool Config::wifiConfigured() {
+  if (!wifi_ssid) {
+    return false;
+  }
   if (strlen(wifi_ssid)) {
     return true;
   }
@@ -28,6 +31,9 @@ bool Config::wifiConfigured() {
 }
 
 bool Config::apiConfigured() {
+  if (!api_host) {
+    return false;
+  }
   if (strlen(api_host)) {
     return true;
   }

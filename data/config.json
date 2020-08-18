@@ -1,5 +1,5 @@
 {
-	"boot_to_config": true,
+	"boot_to_config": 1,
 	"wifi_ssid": "",
 	"wifi_password": "",
 	"api_host": ""
