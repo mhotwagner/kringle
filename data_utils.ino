@@ -12,9 +12,16 @@ String renderFile(String path, JsonObject data) {
   return content;
 }
 
+bool fileExists(String path) {
+  if (SPIFFS.exists(path)) {
+    return true;
+  }
+  return false;
+}
+
 String readFile(String path) {
   Serial.println("[INFO] Reading file " + path);
-  if (SPIFFS.exists(path)) {
+  if (fileExists(path)) {
     File file = SPIFFS.open(path, "r");
     String data = file.readString();
     file.close();

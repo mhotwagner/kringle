@@ -1,31 +1,22 @@
-
-// Config Server
-void initializeConfigServer() {
-  Serial.println("[INFO] Starting config server over wifi");
-
-  const char* ssid = "northpoler";  // Enter SSID here
-  const char* password = "";  //Enter Password here
-
-  IPAddress local_ip(192, 168, 1, 1);
-  IPAddress gateway(192, 168, 1, 1);
-  IPAddress subnet(255, 255, 255, 0);
-
-  WiFi.softAP(ssid, password);
-  WiFi.softAPConfig(local_ip, gateway, subnet);
-
-  server.on("/", handleAuthDash);
-  server.on("/config/", HTTP_POST, handleAuthUpdate);
-  server.onNotFound(handleNotFound);
-
-  server.begin();
-
-  Serial.print("[INFO] Broadcasting as SSID <");
-  Serial.print(ssid);
-  Serial.println(">");
-  Serial.print("[INFO] Accepting connections at <");
-  Serial.print(local_ip);
-  Serial.println(">");
+String getContentType(String extension) {
+  if (extension == "json") {
+    return "application/json";
+  } else if (extension == "js") {
+    return "application/javascript";
+  } else if (extension == "gif") {
+    return "image/gif";
+  } else if (extension == "jpg" || extension == "jpeg") {
+    return "image/jpeg";
+  } else if (extension == "png") {
+    return "image/png";
+  } else if (extension == "html") {
+    return "text/html";
+  } else if (extension == "css") {
+    return "text/css";
+  }
+  return "text/plain";
 }
+
 
 String renderAuthTemplate(String _template, Config _conf) {
   _template.replace("{{boot_to_config}}", _conf.boot_to_config ? "checked" : "");
@@ -74,11 +65,63 @@ void handleAuthUpdate() {
   }
 }
 
+class AssetHandler : public RequestHandler {
+  bool canHandle(HTTPMethod method, String uri) {
+    return uri.startsWith("/assets/");
+  }
+  bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, String requestUri) {
+    Serial.println("[INFO] GET " + requestUri);
+    String path = requestUri.substring(7);
+    Serial.println(path);
+
+    if (!fileExists(path)) {
+      handleNotFound();
+      return false;
+    }
+
+    String extension = path.substring(path.indexOf("."));
+    String content = readFile(path);
+
+    server.send(200, getContentType(extension), content);
+    return true;
+  }
+} assetHandler;
+
 void handleNotFound() {
   Serial.print("[WARN] ");
   Serial.print(server.method());
   Serial.print(" ");
   Serial.print(server.uri());
   Serial.println(" NOT FOUND");
-  server.send(400);
+  server.send(404);
+}
+
+// Config Server
+void initializeConfigServer() {
+  Serial.println("[INFO] Starting config server over wifi");
+
+  const char* ssid = "northpoler";  // Enter SSID here
+  const char* password = "";  //Enter Password here
+
+  IPAddress local_ip(192, 168, 1, 1);
+  IPAddress gateway(192, 168, 1, 1);
+  IPAddress subnet(255, 255, 255, 0);
+
+  WiFi.softAP(ssid, password);
+  WiFi.softAPConfig(local_ip, gateway, subnet);
+
+  server.addHandler(&assetHandler);
+
+  server.on("/", handleAuthDash);
+  server.on("/config/", HTTP_POST, handleAuthUpdate);
+  server.onNotFound(handleNotFound);
+
+  server.begin();
+
+  Serial.print("[INFO] Broadcasting as SSID <");
+  Serial.print(ssid);
+  Serial.println(">");
+  Serial.print("[INFO] Accepting connections at <");
+  Serial.print(local_ip);
+  Serial.println(">");
 }
