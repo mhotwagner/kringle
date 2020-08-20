@@ -1,6 +1,6 @@
 import wretch from "wretch";
 
-const API_HOST = '192.168.1.1'
+const API_HOST = '192.168.1.1';
 
 export const api = {
     config: {
@@ -14,13 +14,15 @@ export const api = {
                 })
         }),
         set: (data) => new Promise((resolve, reject) => {
+            console.log('api.config.set');
             console.log(data);
+            console.log(JSON.stringify(data));
             wretch(`http://${API_HOST}/api/config`)
                 .post(data)
                 .res(response => {
                     console.log('🎉');
                     console.log(response);
-                    resolve(data);
+                    resolve(response);
                 })
                 .catch(err => {
                     console.log('😢');

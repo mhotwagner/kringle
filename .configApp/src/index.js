@@ -5,25 +5,29 @@ import {ConfigForm} from "./ConfigForm";
 import {css} from 'emotion';
 import {api} from "./api";
 
+const INVALID_API_HOST_CHARS = '!@#$%^&*():/\,;[]{}=+~`\'"|,'.split('');
+
 const configValidator = (data) => {
-    console.log('validating');
+    console.log('validating!');
     let errors = [];
     let warnings = [];
-    if (!data.wifi_ssid) errors.push({type: 'wifi_ssid', message: 'Wifi SSID cannot be empty'})
+    if (!data.wifi_ssid) errors.push({type: 'wifi_ssid', message: 'Wifi SSID cannot be empty'});
     if (!data.wifi_password) errors.push({type: 'wifi_password', message: 'Wifi Password cannot be empty'})
     if (data.api_host) {
-        if (data.api_host.indexOf('http://')) data.api_host = data.api_host.replace('http://','');
-        if (data.api_host.indexOf('https://')) data.api_host = data.api_host.replace('https://','');
-        if (data.api_host.charAt(data.api_host.length-1) === '/') data.api_host = data.api_host.slice(0, -1);
-        if ('!@#$%^&*():/\\,;[]{}=+~`\'"|'.split('').some((char) => data.api_host.indexOf(char) > 1))
-            errors.push({type: 'api_host', message: 'Invalid character in API Host'});
+        if (data.api_host.startsWith('http://')) data.api_host = data.api_host.substr(7);
+        if (data.api_host.startsWith('https://')) data.api_host = data.api_host.substr(8);
+        if (data.api_host.endsWith('/')) data.api_host = data.api_host.slice(0, -1);
+        const invalidChars =  INVALID_API_HOST_CHARS.filter(char => data.api_host.indexOf(char) > -1);
+        for (const invalidChar of invalidChars) {
+            errors.push({type: 'api_host', message: `Invalid character "${invalidChar}" in API Host`});
+        }
         if (data.api_host.indexOf('.') < 1) errors.push({type: 'api_host', message: 'API Host should be in the form of "api.northpoler.com"'})
    } else {
         warnings.push({type: 'api_host', message: 'Using api-staging.northpoler.com'});
         data.api_host = 'api-staging.northpoler.com';
     }
     return {data, errors, warnings};
-}
+};
 
 export default class App extends Component {
     state = {
@@ -31,7 +35,7 @@ export default class App extends Component {
         wifi_ssid: null,
         wifi_password: null,
         api_host: null,
-    }
+    };
 
     componentDidMount() {
         api
@@ -64,11 +68,12 @@ export default class App extends Component {
             return false;
         } else {
             this.setState(data);
+            console.log(this.state);
             api
                 .config
-                .set(data)
-                .then(data => console.log('🎉'))
-                .catch(err => console.log('😢'))
+                .set(this.state)
+                .then(data => console.log('🎉') || console.log(data))
+                .catch(err => console.log('😢') || console.log(err))
         }
     }
 
