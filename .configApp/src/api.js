@@ -18,6 +18,7 @@ export const api = {
             console.log(data);
             console.log(JSON.stringify(data));
             wretch(`http://${API_HOST}/api/config`)
+                .options({mode: "no-cors"})
                 .post(data)
                 .res(response => {
                     console.log('🎉');

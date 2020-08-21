@@ -5,7 +5,7 @@ import {buttonStyle, inputStyle, toggleStyle, inputWarningStyle, inputErrorStyle
 
 export function Button(props) {
     const style = css`
-        ${buttonStyle}
+        ${buttonStyle(props.hoverColor)}
         ${props.css ? props.css : ''}
     `;
     return (
@@ -33,10 +33,6 @@ function Checkbox(props) {
 }
 
 export function ToggleGroup(props) {
-    // console.log(`ToggleGroup: ${props.value}`)
-    // console.log('options');
-    // console.log(props.options);
-
     return (
         <Fragment>
             <label htmlFor={props.name} className={css`margin-bottom: .5em`}>{props.children}</label>

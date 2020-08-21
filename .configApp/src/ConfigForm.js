@@ -5,6 +5,7 @@ import {useState} from "preact/hooks";
 export function ConfigForm(props) {
     const [errors, setErrors] = useState([]);
     const [warnings, setWarnings] = useState([]);
+    const isMobile = window.innerWidth < 600;
 
     return (
         <form
@@ -50,14 +51,29 @@ export function ConfigForm(props) {
                 value={props.conf.boot_to_config}
                 options={props.bootToConfigOptions}
                 onChange={props.bootToConfigSwitchHandler}
-                className={css`margin-bottom: 1em`}
             >Boot to Config</ToggleGroup>
 
-            <Button
-                id="update"
-                className={css`margin-top: 1em;`}
-                onClick={(e) => props.submitHandler(e, setErrors, setWarnings)}
-            >Update</Button>
+            <div
+                className={css`
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-around;
+                  flex-direction: ${ isMobile ? 'column' : 'row'};
+                  button {
+                    margin-top: 1em;
+                    width: ${ isMobile ? '66' : '33'}%;
+                  }
+            `}>
+                <Button
+                    onClick={(e) => props.submitHandler(e, setErrors, setWarnings)}
+                >Update</Button>
+
+                <Button
+                    onClick={(e) => window.location = '/reboot/'}
+                    hoverColor={css`hotpink`}
+                >Reboot</Button>
+            </div>
+
         </form>
     );
 }

@@ -1,6 +1,6 @@
 import {css} from "emotion";
 
-export const buttonStyle = css`
+export const buttonStyle = (hoverColor=css`#eee`) => css`
   background-color: #fff;
   line-height: 1.5em;
   cursor: pointer;
@@ -9,7 +9,7 @@ export const buttonStyle = css`
   border-radius: 2px;
   border-color: #000;
   &:focus, &:hover {
-    background-color: #eee;
+    background-color: ${hoverColor};
     outline: none;
     border-style: inset;
   }`;
@@ -17,7 +17,7 @@ export const toggleStyle = css`
                   display: flex;
                   flex-direction: row;
                   justify-content: center;
-                  margin-bottom: 1.5em;
+                  margin-bottom: 1em;
                   button {
                     display: inline-block;
                     padding: .5em 1em;
