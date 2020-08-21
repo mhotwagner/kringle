@@ -1,80 +1,102 @@
 import {Component} from 'preact';
 
-import {ConfigForm} from "./ConfigForm";
+import {ConfigForm, configValidator, NOT_SUBMITTED, SUBMIT_SUCCESS, SUBMIT_ERROR} from "./ConfigForm";
 
 import {css} from 'emotion';
 import {api} from "./api";
 
-const INVALID_API_HOST_CHARS = '!@#$%^&*():/\,;[]{}=+~`\'"|,'.split('');
-
-const configValidator = (data) => {
-    console.log('validating!');
-    let errors = [];
-    let warnings = [];
-    if (!data.wifi_ssid) errors.push({type: 'wifi_ssid', message: 'Wifi SSID cannot be empty'});
-    if (!data.wifi_password) errors.push({type: 'wifi_password', message: 'Wifi Password cannot be empty'})
-    if (data.api_host) {
-        if (data.api_host.startsWith('http://')) data.api_host = data.api_host.substr(7);
-        if (data.api_host.startsWith('https://')) data.api_host = data.api_host.substr(8);
-        if (data.api_host.endsWith('/')) data.api_host = data.api_host.slice(0, -1);
-        const invalidChars =  INVALID_API_HOST_CHARS.filter(char => data.api_host.indexOf(char) > -1);
-        for (const invalidChar of invalidChars) {
-            errors.push({type: 'api_host', message: `Invalid character "${invalidChar}" in API Host`});
-        }
-        if (data.api_host.indexOf('.') < 1) errors.push({type: 'api_host', message: 'API Host should be in the form of "api.northpoler.com"'})
-   } else {
-        warnings.push({type: 'api_host', message: 'Using api-staging.northpoler.com'});
-        data.api_host = 'api-staging.northpoler.com';
-    }
-    return {data, errors, warnings};
-};
-
 export default class App extends Component {
     state = {
-        boot_to_config: false,
-        wifi_ssid: null,
-        wifi_password: null,
-        api_host: null,
+        conf: {
+            boot_to_config: false,
+            wifi_ssid: null,
+            wifi_password: null,
+            api_host: null,
+        },
+        submitting: false,
+        submitStatus: NOT_SUBMITTED,
+        errors: [],
+        warnings: [],
     };
 
     componentDidMount() {
         api
             .config
             .get()
-            .then((data) => { this.setState(data) });
+            .then((data) => { this.setState({...this.state, conf: data}) });
     }
 
+    clearErrorsAndWarnings = name => {
+        this.setState({
+            conf: this.state.conf,
+            submitting: false,
+            submitStatus: NOT_SUBMITTED,
+            errors: this.state.errors.filter(error => error.type !== name),
+            warnings: this.state.warnings.filter(warning => warning.type !== name),
+        })
+    }
+    focusHandler = e => {
+        console.log('focusing?');
+        const {name} = e.target;
+        this.clearErrorsAndWarnings(name);
+    }
     inputHandler = e => {
         e.preventDefault();
         const {name, value} = e.target;
-        const _state = this.state;
-        _state[name] = value;
-        this.setState(_state);
+        const _conf = this.state.conf;
+        _conf[name] = value;
+        this.setState({...this.state, conf: _conf});
     };
     bootToConfigSwitchHandler = e => {
         e.preventDefault();
         const {value} = e.target;
-        const _state = { ...this.state, boot_to_config: value === 'on'};
-        this.setState(_state);
+        const _conf = this.state.conf;
+        _conf.boot_to_config = Number(value === 'on');
+        this.setState({ ...this.state, conf: _conf});
         e.target.blur();
     };
-    submitHandler = (e, setErrors, setWarnings) => {
+    submitHandler = (e) => {
         e.preventDefault();
         console.log('submitting!');
-        const {data, errors, warnings} = configValidator(this.state);
-        if (warnings.length) setWarnings(warnings);
+        const {data, errors, warnings} = configValidator(this.state.conf);
+        this.setState({...this.state, conf: data});
+        if (warnings.length) this.setState({...this.state, warnings});
         if (errors.length) {
-            setErrors(errors);
+            this.setState({...this.state, errors})
             return false;
         } else {
-            this.setState(data);
-            console.log(this.state);
+            this.setState({...this.state, submitting: true})
             api
                 .config
-                .set(this.state)
-                .then(data => console.log('🎉') || console.log(data))
-                .catch(err => console.log('😢') || console.log(err))
+                .set(this.state.conf)
+                .then(data => {
+                    console.log('🎉');
+                    console.log(data);
+                    this.setState({
+                        ...this.state,
+                        submitting: false,
+                        submitStatus: SUBMIT_SUCCESS,
+                    });
+                })
+                .catch(err => {
+                    setTimeout(() => {
+                        console.log('😢');
+                        console.log(err);
+                        this.setState({
+                            ...this.state,
+                            submitting: false,
+                            submitStatus: SUBMIT_ERROR,
+                        })
+                    }, 5000).bind(this);
+                });
         }
+    }
+    rebootHandler = (e) => {
+        e.preventDefault();
+        if (confirm("Are you sure you want to reboot the ornament?\n(Turn on Boot To \"Config\" to return here)")) {
+            window.location = '/reboot/';
+        }
+        e.target.blur();
     }
 
     render() {
@@ -86,21 +108,21 @@ export default class App extends Component {
 				align-content: center;
 			`}>
                 <ConfigForm
-                    configUrl={this.state.configUrl}
-                    conf={{
-                        boot_to_config: this.state.boot_to_config,
-                        wifi_ssid: this.state.wifi_ssid,
-                        wifi_password: this.state.wifi_password,
-                        api_host: this.state.api_host,
-                    }}
+                    conf={this.state.conf}
                     toggleSwitchHandler={this.toggleSwitchHandler}
                     inputHandler={this.inputHandler}
+                    focusHandler={this.focusHandler}
                     bootToConfigOptions={[
-                        {name: 'On', active: this.state.boot_to_config},
-                        {name: 'Off', active: !this.state.boot_to_config}
+                        {name: 'On', active: this.state.conf.boot_to_config},
+                        {name: 'Off', active: !this.state.conf.boot_to_config}
                     ]}
                     bootToConfigSwitchHandler={this.bootToConfigSwitchHandler}
                     submitHandler={this.submitHandler}
+                    rebootHandler={this.rebootHandler}
+                    warnings={this.state.warnings}
+                    errors={this.state.errors}
+                    submitting={this.state.submitting}
+                    submitStatus={this.state.submitStatus}
                     css={css`width: 400px`}
                 />
             </div>

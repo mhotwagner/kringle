@@ -4,10 +4,7 @@ import {buttonStyle, inputStyle, toggleStyle, inputWarningStyle, inputErrorStyle
 
 
 export function Button(props) {
-    const style = css`
-        ${buttonStyle(props.hoverColor)}
-        ${props.css ? props.css : ''}
-    `;
+    const style = buttonStyle(props);
     return (
         <button
             id={props.id}
@@ -15,6 +12,7 @@ export function Button(props) {
             value={props.value}
             onClick={props.onClick}
             className={style}
+            disabled={props.disabled}
         >{props.children}</button>
     )
 }
@@ -45,7 +43,7 @@ export function ToggleGroup(props) {
                             value={value}
                             onClick={props.onChange}
                             active={option.active}
-                            css={option.active ? css`background-color: #ccc; border-style: inset` : null}
+                            disabled={props.disabled}
                         >{option.name}</Button>
                     )
                 })}
@@ -72,7 +70,9 @@ export function Input(props) {
                 id={props.name}
                 value={props.value}
                 onInput={props.onChange}
+                onFocus={props.onFocus}
                 className={inputStyle}
+                disabled={props.disabled}
             />
         </Fragment>
     );
