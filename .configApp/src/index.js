@@ -94,7 +94,7 @@ export default class App extends Component {
     rebootHandler = (e) => {
         e.preventDefault();
         if (confirm("Are you sure you want to reboot the ornament?\n(Turn on Boot To \"Config\" to return here)")) {
-            window.location = '/reboot/';
+            if (typeof window !== 'undefined') window.location = '/reboot/';
         }
         e.target.blur();
     }

@@ -44,7 +44,7 @@ const renderUploading = (submitting, submitStatus) => {
 const submitBackgroundColors = ['white', 'springgreen', 'hotpink'];
 
 export function ConfigForm(props) {
-  const isMobile = window.innerWidth < 600;
+  const isMobile = typeof window !== 'undefined' ? window.innerWidth < 600 : false;
 
   const submitBackgroundColor = submitBackgroundColors[props.submitStatus];
   console.log(submitBackgroundColor);
