@@ -1,17 +1,17 @@
-String getContentType(String extension) {
-  if (extension == "json") {
+String getContentType(String path) {
+  if (path.endsWith("json")) {
     return "application/json";
-  } else if (extension == "js") {
+  } else if (path.endsWith("js")) {
     return "application/javascript";
-  } else if (extension == "gif") {
+  } else if (path.endsWith("gif")) {
     return "image/gif";
-  } else if (extension == "jpg" || extension == "jpeg") {
+  } else if (path.endsWith("jpg") || path.endsWith("jpeg")) {
     return "image/jpeg";
-  } else if (extension == "png") {
+  } else if (path.endsWith("png")) {
     return "image/png";
-  } else if (extension == "html") {
+  } else if (path.endsWith("html")) {
     return "text/html";
-  } else if (extension == "css") {
+  } else if (path.endsWith("css")) {
     return "text/css";
   }
   return "text/plain";
@@ -27,14 +27,15 @@ String renderAuthTemplate(String _template, Config _conf) {
 
 void handleAuthDash() {
   Serial.println("[INFO] GET /");
-  String content = readFile("/config.html");
-  Serial.print(content);
-  server.send(200, "text/html", content);
+  File file = getFile("/config.html");
+  String ct = getContentType("/config.html");
+  server.streamFile(file, ct);
+  file.close();
 }
 
 bool processAuthUpdate(String _doc) {
   Serial.println("[INFO] POST /config/");
-  DynamicJsonDocument doc(128);
+  DynamicJsonDocument doc(512);
   deserializeJson(doc, _doc);
   if (!doc.containsKey("wifi_ssid") || !doc.containsKey("wifi_password") || !doc.containsKey("api_host")) {
     server.send(500, "text/plain", "[ERROR] MUST INCLUDE wifi_ssid AND wifi_password AND api_host ARGUMENTS");
@@ -93,9 +94,13 @@ class AssetHandler : public RequestHandler {
       return false;
     }
 
-    String extension = path.substring(path.indexOf("."));
+    // if (fileExists(path)) {
+    // File file = SPIFFS.open(path, "r");
 
-    server.send(200, getContentType(extension), readFile(path));
+    File file = getFile(path);
+    String ct = getContentType(path);
+    server.streamFile(file, ct);
+    file.close();
     return true;
   }
 } assetHandler;
@@ -109,7 +114,11 @@ class ConfigApiHandler : public RequestHandler {
     String path = requestUri.substring(4);
     if (requestMethod==HTTP_GET) {
       Serial.println("[INFO] GET /api/config/");
-      server.send(200, "application/json", readFile("/config.json"));
+
+      File file = getFile(path);
+      String ct = getContentType("/config.json");
+      server.streamFile(file, ct);
+      file.close();
       return true;
     }
     if (requestMethod==HTTP_POST) {

@@ -19,15 +19,25 @@ bool fileExists(String path) {
   return false;
 }
 
-String readFile(String path) {
-  Serial.println("[INFO] Reading file " + path);
+File getFile(String path) {
+  Serial.println("[INFO] Getting file " + path);
   if (fileExists(path)) {
-    File file = SPIFFS.open(path, "r");
+    File file  = SPIFFS.open(path, "r");
+    return file;
+  }
+  Serial.println("[ERROR] File Not Found");
+  File file;
+  return file;
+}
+
+String readFile(String path) {
+  File file = getFile(path);
+  if (file) {
+    Serial.println("[INFO] Reading file " + path);
     String data = file.readString();
     file.close();
     return data;
   }
-  Serial.println("[ERROR] File Not Found");
   return "";
 }
 

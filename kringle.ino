@@ -23,7 +23,7 @@ bool configured = false;
 
 int dataPin = D8;
 int ledCount = 6;
-Ornament ornament = Ornament(dataPin, true);
+Ornament ornament = Ornament(dataPin, &Serial, false);
 
 void(* reboot) (void) = 0;
 
