@@ -1,3 +1,4 @@
+#include <Logger.h>
 #include <Ornament.h>
 #include "Config.h"
 
@@ -18,66 +19,67 @@ WebsocketsClient socketClient;
 
 HTTPClient webClient;
 
+Logger logger = Logger(WiFi.macAddress(), &webClient, &Serial);
+
 Config conf;
 bool configured = false;
 
 int dataPin = D8;
 int ledCount = 6;
-Ornament ornament = Ornament(dataPin, &Serial, false);
+Ornament ornament = Ornament(dataPin, &logger, false);
 
 void(* reboot) (void) = 0;
 
 void setup() {
   Serial.begin(9600);
 
-  Serial.println("[INFO] Initializing ornament");
+  logger.log("[INFO] Initializing ornament");
 
-  Serial.print("[INFO] Initalizing SPIFFS filesystem...");
+  logger.log("[INFO] Initalizing SPIFFS filesystem...");
   if (initializeFS()) {
-    Serial.println("OK");
+    logger.log("OK");
   } else {
-    Serial.println("ERROR");
+    logger.log("ERROR");
     exit(1);
   }
 
   conf = Config();
 
   if (conf.boot_to_config) {
-    Serial.println("[WARN] Encountered boot_to_config directive");
-    Serial.println("[WARN] Skipping rest of config check and");
-    Serial.println("[WARN] Running Configuration server");
+    logger.log("[WARN] Encountered boot_to_config directive");
+    logger.log("[WARN] Skipping rest of config check and");
+    logger.log("[WARN] Running Configuration server");
     initializeConfigServer();
     return;
   }
 
   if (!conf.wifiConfigured()) {
-    Serial.println("[WARN] Wifi is NOT CONFIGURED");
+    logger.log("[WARN] Wifi is NOT CONFIGURED");
   } else {
-    Serial.print("[INFO] Wifi is configured to ");
-    Serial.println(conf.wifi_ssid);
+    logger.log("[INFO] Wifi is configured to " + String(conf.wifi_ssid));
   }
 
   if (!conf.apiConfigured()) {
-    Serial.println("[WARN] API is NOT CONFIGURED");
+    logger.log("[WARN] API is NOT CONFIGURED");
   } else {
-    Serial.print("[INFO] API is configured to ");
-    Serial.println(conf.api_host);
+    logger.log("[INFO] API is configured to " + String(conf.api_host));
   }
 
   if (conf.apiConfigured()) {
+    logger.setApi(conf.api_host);
     initializeApi(conf.api_host);
   }
 
   if (conf.wifiConfigured() && conf.apiConfigured()) {
     ornament.on(Ornament::c_green, 50);
-    Serial.println("[INFO] Congifuration loaded successfully");
-    Serial.println("[INFO] Starting Ornament socket server");
+    logger.log("[INFO] Congifuration loaded successfully");
+    logger.log("[INFO] Starting Ornament socket server");
     initializeWifiClient(conf.wifi_ssid, conf.wifi_password);
     configured = true;
   } else {
     // ornament.on(Ornament::c_yellow, 50);
-    Serial.println("[WARN] Congifuration failed to load");
-    Serial.println("[WARN] Running configuration server");
+    logger.log("[WARN] Congifuration failed to load");
+    logger.log("[WARN] Running configuration server");
     initializeConfigServer();
   }
 
