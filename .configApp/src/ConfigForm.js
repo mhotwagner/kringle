@@ -67,9 +67,10 @@ export function ConfigForm(props) {
           margin-bottom: 1em;
           padding-bottom: 0.5em;
           border-bottom: 1px solid #333;
+          text-align: center;
         `}
       >
-        Northpoler Configuration
+          ❄ ️Northpoler Configuration ❄
       </h4>
 
       <Input
@@ -153,7 +154,7 @@ export function ConfigForm(props) {
 
 const INVALID_API_HOST_CHARS = '!@#$%^&*():/\,;[]{}=+~`\'"|,'.split('');
 export const configValidator = (data) => {
-    console.log('validating!');
+    console.log('validating');
     let errors = [];
     let warnings = [];
     if (!data.wifi_ssid) errors.push({type: 'wifi_ssid', message: 'Wifi SSID cannot be empty'});

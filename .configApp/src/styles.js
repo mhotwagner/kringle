@@ -4,7 +4,7 @@ export const buttonStyle = (props) => {
   const hoverColor = props.disabled ? '#eee' : props.hoverColor || '#eee';
   const hoverCursor = props.disabled ? css`cursor: not-allowed` : '';
   return css`
-      background-color: ${props.active ? '#eee' : '#fff'};
+      background-color: ${props.active ? 'springgreen' : '#fff'};
       line-height: 1.5em;
       padding: 0.25em;
       cursor: pointer;
