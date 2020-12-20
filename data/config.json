@@ -1,6 +1,6 @@
 {
 	"boot_to_config": 1,
-	"wifi_ssid": "",
-	"wifi_password": "",
-	"api_host": ""
+	"wifi_ssid": "MikeLikesLaura",
+	"wifi_password": "20190824",
+	"api_host": "northpoler-staging.herokuapp.com"
 }

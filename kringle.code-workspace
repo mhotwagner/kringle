@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "kringle",
+			"path": "../../../Documents/PlatformIO/Projects/kringle"
+		}
+	],
+	"settings": {}
+}

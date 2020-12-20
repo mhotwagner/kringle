@@ -1,14 +1,14 @@
-void initializeWifiClient(const char* wifi_ssid, const char* wifi_pass) {
-  Serial.println("[INFO] Initializing wifi client");
-  Serial.print("[INFO] Connecting to ");
-  Serial.print(wifi_ssid);
-  Serial.println("...");
+void initializeWifiClient(String wifi_ssid, String wifi_pass) {
+  logger.log(wifi_ssid);
+  logger.log("[INFO] Initializing wifi client");
+  logger.log("[INFO] Connecting to " + wifi_ssid);
+  logger.log("...");
   WiFi.begin(wifi_ssid, wifi_pass);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
+    logger.log(".");
   }
-  Serial.println("[INFO] Connected");
-  Serial.print("[INFO] IP: ");
-  Serial.println(WiFi.localIP());
+  logger.log("[INFO] Connected");
+  logger.log("[INFO] IP: ");
+  logger.log(WiFi.localIP());
 }

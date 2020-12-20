@@ -173,7 +173,7 @@ export const configValidator = (data) => {
         })
     } else {
         warnings.push({type: 'api_host', message: 'Using api-staging.northpoler.com'});
-        data.api_host = 'api-staging.northpoler.com';
+        data.api_host = 'northpoler-staging.herokuapp.com';
     }
     return {data, errors, warnings};
 };

@@ -29,7 +29,7 @@ void handleAuthDash() {
   Serial.println("[INFO] GET /");
   File file = getFile("/config.html");
   String ct = getContentType("/config.html");
-  server.streamFile(file, ct);
+  logger.log(server.streamFile(file, ct));
   file.close();
 }
 
@@ -58,7 +58,7 @@ bool processAuthUpdate(String _doc) {
   if (success) {
     Serial.println("[INFO] Success");
     return true;
-    reboot();
+
   } else {
     Serial.println("[ERROR] Failed to save configuration");
     return false;
@@ -71,13 +71,38 @@ void handleAuthUpdate() {
   bool success = processAuthUpdate(server.arg(0));
   if (success) {
     Serial.println("[INFO] Success");
-    server.send(200);
     delay(1000);
+    server.send(200, "text/plain", "ok");
     reboot();
   } else {
     Serial.println("[ERROR] Failed to save configuration");
-    server.send(500);
+    server.send(500, "text/plain", "failed to save config");
   }
+}
+
+size_t streamFile(File file, String contentType) {
+  int fileSize = file.size();
+  server.setContentLength(fileSize);
+  String filename = file.name();
+  if (filename.endsWith("gz")) {
+    server.sendHeader("Content-Encoding", "gzip");
+  }
+  server.sendHeader("Connection", "keep-alive");
+  server.send(200, contentType, "");
+
+  char buffer[1024];
+  int sentSize = 0;
+  while (fileSize > 0) {
+    logger.log(".");
+    size_t length = min((int)(sizeof(buffer) - 1), fileSize);
+    file.read((uint8_t *)buffer, length);
+    int _sentSize = server.client().write((const char*)buffer, length);
+    sentSize += _sentSize;
+    logger.log(_sentSize);
+    fileSize -= length;
+  }
+  // server.sendHeader("Connection", "close");
+  return sentSize;
 }
 
 class AssetHandler : public RequestHandler {
@@ -87,7 +112,6 @@ class AssetHandler : public RequestHandler {
   bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, String requestUri) {
     Serial.println("[INFO] GET " + requestUri);
     String path = requestUri.substring(7);
-    Serial.println(path);
 
     if (!fileExists(path)) {
       handleNotFound();
@@ -96,14 +120,30 @@ class AssetHandler : public RequestHandler {
 
     // if (fileExists(path)) {
     // File file = SPIFFS.open(path, "r");
-
+    logger.log("1");
     File file = getFile(path);
+    logger.log("2");
     String ct = getContentType(path);
-    server.streamFile(file, ct);
+    logger.log("3");
+    Serial.print("actual size: ");
+    Serial.println(file.size());
+    size_t sentSize = streamFile(file, ct);
+    Serial.print("sent size: ");
+    Serial.println(sentSize);
+    logger.log("4");
     file.close();
     return true;
   }
 } assetHandler;
+
+bool streamConfig() {
+  File file = getFile("/config.json");
+  String ct = getContentType("/config.json");
+  size_t sentSize = streamFile(file, ct);
+  bool success = sentSize == file.size();
+  file.close();
+  return success;
+}
 
 class ConfigApiHandler : public RequestHandler {
   bool canHandle(HTTPMethod method, String uri) {
@@ -111,15 +151,16 @@ class ConfigApiHandler : public RequestHandler {
   }
 
   bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, String requestUri) {
-    String path = requestUri.substring(4);
+    String path = requestUri.substring(5);
     if (requestMethod==HTTP_GET) {
-      Serial.println("[INFO] GET /api/config/");
+      Serial.println("[INFO] GET /api/");
 
-      File file = getFile(path);
-      String ct = getContentType("/config.json");
-      server.streamFile(file, ct);
-      file.close();
-      return true;
+      if (path=="config") {  
+        return streamConfig();
+      } else {
+          server.send(404, "text/plain", requestUri + " not found");
+          return false;
+      }
     }
     if (requestMethod==HTTP_POST) {
       Serial.println("[INFO] POST /api/config/");

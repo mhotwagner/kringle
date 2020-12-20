@@ -64,7 +64,7 @@ void socketOnConfigUpdate(JsonObject config) {
 }
 
 void initializeApi(String apiUrlBase) {
-  Serial.println("[INFO] Initializing api");
+  Serial.println("[INFO] Initializing api to " + apiUrlBase);
   String macId = WiFi.macAddress();
   String apiUrl= "http://" + apiUrlBase + "/api/ornaments/" + macId + "/";
   Serial.println("[INFO] GET " + apiUrl);
