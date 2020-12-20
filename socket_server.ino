@@ -89,6 +89,6 @@ void initializeApi(String apiUrlBase) {
 
   socketClient.onMessage(socketOnMessage);
   socketClient.onEvent(socketOnEvent);
-  String socketUrl = "http://" + apiUrlBase + "/ws/ornaments/device/" + macId + "/";
+  String socketUrl = "wss://" + apiUrlBase + "/ws/ornaments/device/" + macId + "/";
   socketClient.connect(socketUrl);
 }
