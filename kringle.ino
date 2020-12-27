@@ -54,18 +54,23 @@ void setup() {
     return;
   }
 
+  if (conf.wifiConfigured()) {
+    WIFI_SSID = conf.wifi_ssid;
+    WIFI_PASS = conf.wifi_password;
+  }
+  if (conf.apiConfigured()) {
+    API_HOST = conf.api_host;
+  }
+
   if (!conf.wifiConfigured()) {
     logger.log("[WARN] Wifi is NOT CONFIGURED");
   } else {
-    WIFI_SSID = conf.wifi_ssid;
-    WIFI_PASS = conf.wifi_password;
     logger.log("[INFO] Wifi is configured to " + WIFI_SSID);
   }
 
   if (!conf.apiConfigured()) {
     logger.log("[WARN] API is NOT CONFIGURED");
   } else {
-    API_HOST = conf.api_host;
     logger.log("[INFO] API is configured to " + API_HOST);
   }
 
@@ -74,9 +79,9 @@ void setup() {
   if (conf.wifiConfigured() && conf.apiConfigured()) {
     // ornament.on(Ornament::c_green, 50);
     logger.log("[INFO] Congifuration loaded successfully");
-    logger.log(WIFI_SSID);
-    logger.log(WIFI_PASS);
-    logger.log(API_HOST);
+    // logger.log(WIFI_SSID);
+    // logger.log(WIFI_PASS);
+    // logger.log(API_HOST);
     // logger.log("[INFO] Starting Ornament socket server");
     initializeWifiClient(WIFI_SSID, WIFI_PASS);
     logger.setApi(API_HOST);
@@ -96,6 +101,7 @@ void setup() {
 void loop() {
   if (configured) {
     socketClient.poll();
+    ornament.execute();
   } else {
     server.handleClient();
   }

@@ -1,3 +1,4 @@
+
 String getContentType(String path) {
   if (path.endsWith("json")) {
     return "application/json";
@@ -16,6 +17,7 @@ String getContentType(String path) {
   }
   return "text/plain";
 }
+
 
 String renderAuthTemplate(String _template, Config _conf) {
   _template.replace("{{boot_to_config}}", _conf.boot_to_config ? "checked" : "");
@@ -118,8 +120,6 @@ class AssetHandler : public RequestHandler {
       return false;
     }
 
-    // if (fileExists(path)) {
-    // File file = SPIFFS.open(path, "r");
     logger.log("1");
     File file = getFile(path);
     logger.log("2");
@@ -132,6 +132,7 @@ class AssetHandler : public RequestHandler {
     Serial.println(sentSize);
     logger.log("4");
     file.close();
+
     return true;
   }
 } assetHandler;

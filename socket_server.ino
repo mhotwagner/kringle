@@ -26,6 +26,16 @@ void socketOnMessage(WebsocketsMessage message) {
     ornament.jmas();
   }
 
+  if (jsonData.containsKey("breathe")) {
+    //jmas(&ornament);
+    ornament.breathe();
+  }
+
+  if (jsonData.containsKey("breathingRainbow")) {
+    //jmas(&ornament);
+    ornament.breathingRainbow();
+  }
+
   if (jsonData.containsKey("reboot") && jsonData["reboot"].as<bool>()) {
     reboot();
   }

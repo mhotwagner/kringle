@@ -31,6 +31,8 @@ bool Config::wifiConfigured() {
 }
 
 bool Config::apiConfigured() {
+  Serial.println("checking api host");
+  Serial.println(api_host);
   if (!api_host) {
     return false;
   }
