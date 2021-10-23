@@ -39,18 +39,16 @@ void setup() {
 
   logger.log("[INFO] Initalizing SPIFFS filesystem...");
   if (initializeFS()) {
-    logger.log("OK");
+    logger.log("[INFO] OK");
   } else {
-    logger.log("ERROR");
+    logger.error("[ERROR] Failed to initialize SPIFFS");
     exit(1);
   }
 
   conf = Config();
 
   if (conf.boot_to_config) {
-    logger.log("[WARN] Encountered boot_to_config directive");
-    logger.log("[WARN] Skipping rest of config check and");
-    logger.log("[WARN] Running Configuration server");
+    logger.warn("[WARN] boot_to_config=TRUE, running config server");
     initializeConfigServer();
     return;
   }
@@ -64,13 +62,13 @@ void setup() {
   }
 
   if (!conf.wifiConfigured()) {
-    logger.log("[WARN] Wifi is NOT CONFIGURED");
+    logger.warn("[WARN] Wifi is NOT CONFIGURED");
   } else {
     logger.log("[INFO] Wifi is configured to " + WIFI_SSID);
   }
 
   if (!conf.apiConfigured()) {
-    logger.log("[WARN] API is NOT CONFIGURED");
+    logger.warn("[WARN] API is NOT CONFIGURED");
   } else {
     logger.log("[INFO] API is configured to " + API_HOST);
   }
@@ -93,8 +91,7 @@ void setup() {
 
   if (!configured) {
     // ornament.on(Ornament::c_yellow, 50);
-    logger.log("[WARN] Congifuration failed to load");
-    logger.log("[WARN] Running configuration server");
+    logger.log("[WARN] Congifuration failed to load, running configuration server", Logger::WARN);
     initializeConfigServer();
   }
 

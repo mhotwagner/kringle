@@ -1,8 +1,9 @@
 StaticJsonDocument<200> jsonData;
 
 void socketOnMessage(WebsocketsMessage message) {
-  Serial.print("Got Message: ");
-  Serial.println(message.data());
+  String msg = "[INFO] Got Message: ";
+  msg.concat(message.data());
+  logger.log(msg);
   deserializeJson(jsonData, message.data());
 
   if (jsonData.containsKey("brightness")) {
@@ -47,18 +48,18 @@ void socketOnMessage(WebsocketsMessage message) {
 
 void socketOnEvent(WebsocketsEvent event, String data) {
     if(event == WebsocketsEvent::ConnectionOpened) {
-        Serial.println("Connnection Opened");
+        logger.log("[INFO] Connnection Opened");
     } else if(event == WebsocketsEvent::ConnectionClosed) {
-        Serial.println("Connnection Closed");
+        logger.log("[INFO] Connnection Closed");
     } else if(event == WebsocketsEvent::GotPing) {
-        Serial.println("Got a Ping!");
+        logger.log("[INFO] Got a Ping!");
     } else if(event == WebsocketsEvent::GotPong) {
-        Serial.println("Got a Pong!");
+        logger.log("[INFO] Got a Pong!");
     }
 }
 
 void socketOnConfigUpdate(JsonObject config) {
-  Serial.println("[INFO] Handling config update via socket");
+  logger.log("[INFO] Handling config update via socket");
   DynamicJsonDocument doc(128);
   doc["wifi_ssid"] = config["boot_to_config"];
   doc["wifi_ssid"] = config["wifi_ssid"];
@@ -67,32 +68,32 @@ void socketOnConfigUpdate(JsonObject config) {
 
   bool success = writeFile("/config.json", doc);
   if (success) {
-    Serial.println("[INFO] Success");
+    logger.log("[INFO] Success");
   } else {
-    Serial.println("[ERROR] Failed to save configuration");
+    logger.error("[ERROR] Failed to save configuration");
   }
 }
 
 void initializeApi(String apiUrlBase) {
-  Serial.println("[INFO] Initializing api to " + apiUrlBase);
+  logger.log("[INFO] Initializing api to " + apiUrlBase);
   String macId = WiFi.macAddress();
   String apiUrl= "http://" + apiUrlBase + "/api/ornaments/" + macId + "/";
-  Serial.println("[INFO] GET " + apiUrl);
+  logger.log("[INFO] GET " + apiUrl);
   WiFiClient wifiClient;
   webClient.begin(wifiClient, apiUrl);
   int statusCode = webClient.GET();
   
-  Serial.println("[INFO] status: " + String(statusCode));
+  logger.log("[INFO] status: " + String(statusCode));
   if (statusCode == 200) {
-    Serial.println("[INFO] API successfully initialized");
+    logger.log("[INFO] API successfully initialized");
     //successBlink(&ornament);
     ornament.success_blink();
   } else if (statusCode == 201) {
-    Serial.println("[INFO] API successfully initialized and new ornament added");
+    logger.log("[INFO] API successfully initialized and new ornament added");
     //infoBlink(&ornament);
     ornament.info_blink();
   } else {
-    Serial.println("[ERROR] Failed to initialize API");
+    logger.error("[ERROR] Failed to initialize API");
     //errorBlink(&ornament);
     ornament.error_blink();
     return;

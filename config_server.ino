@@ -10,7 +10,7 @@ String getContentType(String path) {
     return "image/jpeg";
   } else if (path.endsWith("png")) {
     return "image/png";
-  } else if (path.endsWith("html")) {
+  } else if ((path.endsWith("html")) || path.endsWith("htm")) {
     return "text/html";
   } else if (path.endsWith("css")) {
     return "text/css";
@@ -28,7 +28,7 @@ String renderAuthTemplate(String _template, Config _conf) {
 }
 
 void handleAuthDash() {
-  Serial.println("[INFO] GET /");
+  logger.log("[INFO] GET /");
   File file = getFile("/config.html");
   String ct = getContentType("/config.html");
   logger.log(server.streamFile(file, ct));
@@ -36,7 +36,7 @@ void handleAuthDash() {
 }
 
 bool processAuthUpdate(String _doc) {
-  Serial.println("[INFO] POST /config/");
+  logger.log("[INFO] POST /config/");
   DynamicJsonDocument doc(512);
   deserializeJson(doc, _doc);
   if (!doc.containsKey("wifi_ssid") || !doc.containsKey("wifi_password") || !doc.containsKey("api_host")) {
@@ -46,38 +46,39 @@ bool processAuthUpdate(String _doc) {
   String ssid = doc["wifi_ssid"];
   String pass = doc["wifi_password"];
   String api_host = doc["api_host"];
-  Serial.print("[INFO] Storing config: { boot_to_config: ");
-  Serial.print(boot_to_config);
-  Serial.print(", wifi_ssid: '");
-  Serial.print(ssid);
-  Serial.print("', wifi_password: '");
-  Serial.print(pass);
-  Serial.print("', api_host: '");
-  Serial.print(api_host);
-  Serial.println("' }");
+  String msg = "[INFO] Storing config: { boot_to_config: ";
+  msg.concat(boot_to_config ? "Y" : "N");
+  msg.concat(", wifi_ssid: '");
+  msg.concat(ssid);
+  msg.concat("', wifi_password: '"); 
+  msg.concat(pass);
+  msg.concat("', api_host: '");
+  msg.concat(api_host);
+  msg.concat("' }");
+  logger.log(msg);
 
   bool success = writeFile("/config.json", doc);
   if (success) {
-    Serial.println("[INFO] Success");
+    logger.log("[INFO] Success");
     return true;
 
   } else {
-    Serial.println("[ERROR] Failed to save configuration");
+    logger.error("[ERROR] Failed to save configuration");
     return false;
   }
 }
 
 
 void handleAuthUpdate() {
-  Serial.println("[INFO] POST /config/");
+  logger.log("[INFO] POST /config/");
   bool success = processAuthUpdate(server.arg(0));
   if (success) {
-    Serial.println("[INFO] Success");
+    logger.log("[INFO] Success");
     delay(1000);
     server.send(200, "text/plain", "ok");
     reboot();
   } else {
-    Serial.println("[ERROR] Failed to save configuration");
+    logger.error("[ERROR] Failed to save configuration");
     server.send(500, "text/plain", "failed to save config");
   }
 }
@@ -110,36 +111,29 @@ size_t streamFile(File file, String contentType) {
 class AssetHandler : public RequestHandler {
   public:
     AssetHandler() {
-      Serial.println("booya");
     }
+
     bool canHandle(HTTPMethod method, const String& uri) {
-      Serial.println("can we handle it?");
-      Serial.println(uri);
-      Serial.println(uri.startsWith("/assets/"));
       return uri.startsWith("/assets/") ? true : false;
     }
     
     bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, const String& requestUri) {
-      Serial.println("[INFO] GET " + requestUri);
+      logger.log("[INFO] GET " + requestUri);
       String path = requestUri.substring(7);
-      Serial.println("[INFO] Attempting to stream " + path);
+      logger.log("[INFO] Attempting to stream " + path);
   
       if (!fileExists(path)) {
         handleNotFound();
         return false;
       }
   
-      logger.log("1");
       File file = getFile(path);
-      logger.log("2");
       String ct = getContentType(path);
-      logger.log("3");
-      Serial.print("actual size: ");
-      Serial.println(file.size());
+      // Serial.print("actual size: ");
+      // Serial.println(file.size());
       size_t sentSize = streamFile(file, ct);
-      Serial.print("sent size: ");
-      Serial.println(sentSize);
-      logger.log("4");
+      // Serial.print("sent size: ");
+      // Serial.println(sentSize);
       file.close();
   
       return true;
@@ -164,7 +158,7 @@ class ConfigApiHandler : public RequestHandler {
     bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, const String& requestUri) {
       String path = requestUri.substring(5);
       if (requestMethod==HTTP_GET) {
-        Serial.println("[INFO] GET /api/");
+        logger.log("[INFO] GET /api/");
   
         if (path=="config") {  
           return streamConfig();
@@ -174,7 +168,7 @@ class ConfigApiHandler : public RequestHandler {
         }
       }
       if (requestMethod==HTTP_POST) {
-        Serial.println("[INFO] POST /api/config/");
+        logger.log("[INFO] POST /api/config/");
         bool success = processAuthUpdate(server.arg(0));
         if (success) {
           server.send(200, "text/plain", "OK");
@@ -188,18 +182,18 @@ class ConfigApiHandler : public RequestHandler {
 };
 
 void handleNotFound() {
-  Serial.print("[WARN] ");
-  Serial.print(server.method());
-  Serial.print(" ");
-  Serial.print(server.uri());
-//  Serial.println(seri
-  Serial.println(" NOT FOUND");
+  String msg = "[WARN] ";
+  msg.concat(server.method());
+  msg.concat(" ");
+  msg.concat(server.uri());
+  msg.concat(" NOT FOUND");
+  logger.warn(msg);
   server.send(404);
 }
 
 // Config Server
 void initializeConfigServer() {
-  Serial.println("[INFO] Starting config server over wifi");
+  logger.log("[INFO] Starting config server over wifi");
 
   const char* ssid = "northpoler";  // Enter SSID here
   const char* password = "";  //Enter Password here
@@ -220,10 +214,12 @@ void initializeConfigServer() {
 
   server.begin();
 
-  Serial.print("[INFO] Broadcasting as SSID <");
-  Serial.print(ssid);
-  Serial.println(">");
-  Serial.print("[INFO] Accepting connections at <");
-  Serial.print(local_ip);
-  Serial.println(">");
+  String msg = "[INFO] Broadcasting as SSID <";
+  msg.concat(ssid);
+  msg.concat(">");
+  logger.log(msg);
+  msg = "[INFO] Accepting connections at <";
+  msg.concat(local_ip.toString());
+  msg.concat(">");
+  logger.log(msg);
 }

@@ -70,7 +70,7 @@ String header;
 
 // Index view
 void handleIndex() {
-  Serial.println("[INFO] GET /");
+  logger.log("[INFO] GET /");
   ornament.blink();
   String data = readFile("/dashboard.html");
   server.send(200, "text/html", data);
@@ -78,14 +78,14 @@ void handleIndex() {
 
 // xmas view
 void handleXmas() {
-  Serial.println("[INFO] GET /xmas/");
+  logger.log("[INFO] GET /xmas/");
   ornament.xmas();
   server.send(200);
 }
 
 // jmas view
 void handleJmas() {
-  Serial.println("[INFO] GET /xmas/");
+  logger.log("[INFO] GET /xmas/");
   ornament.jmas();
   server.send(200);
 }
@@ -93,7 +93,7 @@ void handleJmas() {
 
 // Start the server
 void initializeServer() {
-  Serial.println("[INFO] Initializaing server...");
+  logger.log("[INFO] Initializaing server...");
 
   server.addHandler(&blinkHandler);
   server.addHandler(&apiHandler);
@@ -106,6 +106,5 @@ void initializeServer() {
 
   server.begin();
   
-  Serial.print("[INFO] Listening on port ");
-  Serial.println(serverPort);
+  logger.log("[INFO] Listening on port " + serverPort);
 }
