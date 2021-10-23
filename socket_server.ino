@@ -78,7 +78,8 @@ void initializeApi(String apiUrlBase) {
   String macId = WiFi.macAddress();
   String apiUrl= "http://" + apiUrlBase + "/api/ornaments/" + macId + "/";
   Serial.println("[INFO] GET " + apiUrl);
-  webClient.begin(apiUrl);
+  WiFiClient wifiClient;
+  webClient.begin(wifiClient, apiUrl);
   int statusCode = webClient.GET();
   
   Serial.println("[INFO] status: " + String(statusCode));

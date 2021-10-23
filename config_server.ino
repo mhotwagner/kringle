@@ -108,34 +108,43 @@ size_t streamFile(File file, String contentType) {
 }
 
 class AssetHandler : public RequestHandler {
-  bool canHandle(HTTPMethod method, String uri) {
-    return uri.startsWith("/assets/");
-  }
-  bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, String requestUri) {
-    Serial.println("[INFO] GET " + requestUri);
-    String path = requestUri.substring(7);
-
-    if (!fileExists(path)) {
-      handleNotFound();
-      return false;
+  public:
+    AssetHandler() {
+      Serial.println("booya");
     }
-
-    logger.log("1");
-    File file = getFile(path);
-    logger.log("2");
-    String ct = getContentType(path);
-    logger.log("3");
-    Serial.print("actual size: ");
-    Serial.println(file.size());
-    size_t sentSize = streamFile(file, ct);
-    Serial.print("sent size: ");
-    Serial.println(sentSize);
-    logger.log("4");
-    file.close();
-
-    return true;
-  }
-} assetHandler;
+    bool canHandle(HTTPMethod method, const String& uri) {
+      Serial.println("can we handle it?");
+      Serial.println(uri);
+      Serial.println(uri.startsWith("/assets/"));
+      return uri.startsWith("/assets/") ? true : false;
+    }
+    
+    bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, const String& requestUri) {
+      Serial.println("[INFO] GET " + requestUri);
+      String path = requestUri.substring(7);
+      Serial.println("[INFO] Attempting to stream " + path);
+  
+      if (!fileExists(path)) {
+        handleNotFound();
+        return false;
+      }
+  
+      logger.log("1");
+      File file = getFile(path);
+      logger.log("2");
+      String ct = getContentType(path);
+      logger.log("3");
+      Serial.print("actual size: ");
+      Serial.println(file.size());
+      size_t sentSize = streamFile(file, ct);
+      Serial.print("sent size: ");
+      Serial.println(sentSize);
+      logger.log("4");
+      file.close();
+  
+      return true;
+    }
+};
 
 bool streamConfig() {
   File file = getFile("/config.json");
@@ -146,42 +155,44 @@ bool streamConfig() {
   return success;
 }
 
-class ConfigApiHandler : public RequestHandler {
-  bool canHandle(HTTPMethod method, String uri) {
-    return uri.startsWith("/api/config");
-  }
-
-  bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, String requestUri) {
-    String path = requestUri.substring(5);
-    if (requestMethod==HTTP_GET) {
-      Serial.println("[INFO] GET /api/");
-
-      if (path=="config") {  
-        return streamConfig();
-      } else {
-          server.send(404, "text/plain", requestUri + " not found");
+class ConfigApiHandler : public RequestHandler {  
+  public:
+    bool canHandle(HTTPMethod requestMethod, const String& uri) override {
+      return uri.startsWith("/api/config");
+    }
+  
+    bool handle(ESP8266WebServer& server, HTTPMethod requestMethod, const String& requestUri) {
+      String path = requestUri.substring(5);
+      if (requestMethod==HTTP_GET) {
+        Serial.println("[INFO] GET /api/");
+  
+        if (path=="config") {  
+          return streamConfig();
+        } else {
+            server.send(404, "text/plain", requestUri + " not found");
+            return false;
+        }
+      }
+      if (requestMethod==HTTP_POST) {
+        Serial.println("[INFO] POST /api/config/");
+        bool success = processAuthUpdate(server.arg(0));
+        if (success) {
+          server.send(200, "text/plain", "OK");
+          return true;
+        } else {
+          server.send(500);
           return false;
+        }
       }
     }
-    if (requestMethod==HTTP_POST) {
-      Serial.println("[INFO] POST /api/config/");
-      bool success = processAuthUpdate(server.arg(0));
-      if (success) {
-        server.send(200, "text/plain", "OK");
-        return true;
-      } else {
-        server.send(500);
-        return false;
-      }
-    }
-  }
-} configApiHandler;
+};
 
 void handleNotFound() {
   Serial.print("[WARN] ");
   Serial.print(server.method());
   Serial.print(" ");
   Serial.print(server.uri());
+//  Serial.println(seri
   Serial.println(" NOT FOUND");
   server.send(404);
 }
@@ -197,11 +208,11 @@ void initializeConfigServer() {
   IPAddress gateway(192, 168, 1, 1);
   IPAddress subnet(255, 255, 255, 0);
 
-  WiFi.softAP(ssid, password);
   WiFi.softAPConfig(local_ip, gateway, subnet);
+  WiFi.softAP(ssid);
 
-  server.addHandler(&assetHandler);
-  server.addHandler(&configApiHandler);
+  server.addHandler(new AssetHandler());
+  server.addHandler(new ConfigApiHandler());
 
   server.on("/", handleAuthDash);
   server.on("/config/", HTTP_POST, handleAuthUpdate);

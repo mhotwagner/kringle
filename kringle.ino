@@ -1,5 +1,7 @@
 #include <Logger.h>
 #include <Ornament.h>
+#include <Star.h>
+#include <Pumpkin.h>
 #include "Config.h"
 
 #include <ArduinoJson.h>
@@ -20,20 +22,20 @@ WebsocketsClient socketClient;
 HTTPClient webClient;
 
 String WIFI_SSID, WIFI_PASS, API_HOST;
-Logger logger = Logger(WiFi.macAddress(), &webClient, &Serial);
+Logger logger = Logger(WiFi.macAddress(), &webClient, &Serial, Logger::INFO, Logger::DEBUG);
 
 Config conf;
 bool configured = false;
 
 int dataPin = D8;
 int ledCount = 6;
-Ornament ornament = Ornament(dataPin, &logger, true);
+Star ornament = Star(dataPin, &logger, true);
 
 void(* reboot) (void) = 0;
 
 void setup() {
   Serial.begin(9600);
-
+  
   logger.log("[INFO] Initializing ornament");
 
   logger.log("[INFO] Initalizing SPIFFS filesystem...");
@@ -83,10 +85,11 @@ void setup() {
     // logger.log(WIFI_PASS);
     // logger.log(API_HOST);
     // logger.log("[INFO] Starting Ornament socket server");
-    initializeWifiClient(WIFI_SSID, WIFI_PASS);
-    logger.setApi(API_HOST);
-    initializeApi(API_HOST);
-    configured = true;
+    if (initializeWifiClient(WIFI_SSID, WIFI_PASS)) {
+      logger.setApi(API_HOST);
+      initializeApi(API_HOST);
+      configured = true;
+    }
   }
 
   if (!configured) {
