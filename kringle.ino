@@ -1,6 +1,5 @@
 #include <Logger.h>
 #include <Ornament.h>
-#include <Star.h>
 #include <Pumpkin.h>
 #include "Config.h"
 
@@ -29,7 +28,7 @@ bool configured = false;
 
 int dataPin = D8;
 int ledCount = 6;
-Star ornament = Star(dataPin, &logger, true);
+Pumpkin ornament = Pumpkin(dataPin, &logger, true);
 
 void(* reboot) (void) = 0;
 
